@@ -24,22 +24,30 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.decomposition import PCA
 
+# Loading in the dataset to train the model.
 dataset = pd.read_csv('tcd ml 2019-20 income prediction training (with labels).csv')
 
+# Catering for missing values and filling them with previous value
 #dataset.isnull().any()
 #dataset = dataset.fillna(method='ffill')
 
+#Feature selection. Selecting only features I think are relevant. 
+#I regarded 'Hair Color' , 'Size of city', 'University Degree' and 'Wears Glasses' as not relevant/important features.
 X = dataset[['Year of Record', 'Age', 'Body Height [cm]',
              'Gender', 'Profession', 'Country']]
 Y = dataset['Income in EUR'].values
 
+#Splitting the data into X_train, Y_train, X-test, Y_test.
 X_train, X_test, Y_train, Y_test = train_test_split(
     X, Y, test_size=0.3, random_state=0)
 
+#Grid Search with Random Forest Regression.
 gsc = GridSearchCV(
     estimator=RandomForestRegressor(),
     param_grid={
+            #Paramter selection. Max Depth is the depth of the tree. 
         'max_depth': range(13, 20),
+            #Number of decision trees.
         'n_estimators': (50, 100, 300),
         #'min_samples_leaf': (10,50),
         #'max_features': ['auto', 'sqrt', 'log2'],
@@ -47,7 +55,8 @@ gsc = GridSearchCV(
     },
     cv=5, scoring='neg_mean_squared_error', verbose=1, n_jobs=-1)
 
-
+#Preparing the features to be passed through the pipeline. Categorical & numerical features are split so as to
+#encode the categorical features only. 
 num_c = ['Year of Record', 'Age', 'Body Height [cm]']
 cat_c = ['Gender', 'Profession', 'Country']
 
@@ -57,30 +66,35 @@ pi = Pipeline(steps=[('Imputer', (ColumnTransformer(transformers=[('num', Simple
                      ('scalar', StandardScaler()),
                      ('grid', gsc)])
 
-
+#fitting the pipeline
 pi.fit(X_train, Y_train)
 
+#The best parameters from Grid search for the Random Forest. 
 best_params = pi._final_estimator.best_params_
 print(best_params)
 
 Y_pred1 = pi.predict(X_test)
 
-
+#Calculating root mean squared error 
 rms = sqrt(mean_squared_error(Y_test, Y_pred1))
 print(rms)
 
 r2 = r2_score(Y_test, Y_pred1)
 print(r2)
 
-
+#Loading in the second dataset for fitting the model. 
 dataset2 = pd.read_csv('tcd ml 2019-20 income prediction test (without labels).csv')
 
-dataset2.isnull().any()
-dataset2 = dataset2.fillna(method='ffill')
+#dataset2.isnull().any()
+#dataset2 = dataset2.fillna(method='ffill')
 
+#Same Features as used to train the model. 
 X1 = dataset2[['Year of Record','Age', 'Body Height [cm]',
 'Gender','Profession','Country']]
 
+#Predicting the income based on the above features.
 Y_pred = pi.predict(X1)
+
+#writing the predictions to the file.
 df = pd.DataFrame({'Predicted': Y_pred.flatten()})
 print(df.to_csv("preds.csv"))
