@@ -37,7 +37,7 @@ X = dataset[['Year of Record', 'Age', 'Body Height [cm]',
              'Gender', 'Profession', 'Country']]
 Y = dataset['Income in EUR'].values
 
-#Splitting the data into X_train, Y_train, X-test, Y_test.
+#Splitting the data into training and testing data. X is the predictors and Y is the target that we want to predict from X.
 X_train, X_test, Y_train, Y_test = train_test_split(
     X, Y, test_size=0.3, random_state=0)
 
