@@ -15,6 +15,7 @@ from sklearn.ensemble import RandomForestRegressor
 #from catboost import CatBoostRegressor
 import xgboost as xgb
 
+#Reading in the data initially
 dataset = pd.read_csv('tcd ml 2019-20 income prediction training (with labels).csv')
 
 # Catering for missing values and filling them with previous value
